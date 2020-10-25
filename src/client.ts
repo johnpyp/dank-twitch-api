@@ -93,7 +93,6 @@ export default class Client {
         },
       })
       .json();
-    console.log(body);
     this.config.tokenCache.set(body.access_token, body.expires_in);
     return body.access_token;
   }

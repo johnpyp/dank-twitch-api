@@ -1,8 +1,23 @@
-import { isFunction } from "is-what";
+import { isFunction, isNull, isString, isUndefined } from "is-what";
 import { Got } from "got";
-import _ from "lodash";
 import { Pagination } from "./responses";
 import Client from "./client";
+
+type NotClean = "" | null | undefined;
+export function cleanObject<T>(
+  obj: Record<string, T>
+): Record<string, Exclude<T, NotClean>> {
+  const result: Record<string, Exclude<T, NotClean>> = {};
+
+  // eslint-disable-next-line no-restricted-syntax
+  Object.keys(obj).forEach((key) => {
+    const v = obj[key];
+    if (!isNull(v) && !isUndefined(v) && !isString(v)) {
+      result[key] = v as Exclude<T, NotClean>;
+    }
+  });
+  return result;
+}
 
 export async function iterateApi<T>(
   request: Got,
@@ -14,7 +29,7 @@ export async function iterateApi<T>(
   const allData: T[] = [];
   const first = Math.min(100, max);
   while (max < 0 || allData.length < max) {
-    const searchParams = _.omitBy({ ...params, after, first }, _.isUndefined);
+    const searchParams = cleanObject({ ...params, after, first });
     const body: {
       data: T[];
       pagination: Pagination;

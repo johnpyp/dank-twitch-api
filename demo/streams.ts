@@ -8,9 +8,8 @@ const main = async (): Promise<void> => {
   });
   try {
     const user = await client.getUser("destiny");
-    console.log("User", user!.json());
-    const stream = await user!.getStream();
-    console.log("Stream", stream!.json());
+    const isLive = await user?.isLive();
+    console.log(isLive);
   } catch (error) {
     console.log("Error", error, error?.response?.body);
   }

@@ -2,10 +2,10 @@
   "name": "dank-twitch-api",
   "version": "0.3.5",
   "description": "A library for interfacing with the twitch api",
-  "main": "dist/dank-twitch-api.js",
+  "main": "dist/index.js",
   "source": "src/index.ts",
   "scripts": {
-    "build": "tsc --build",
+    "build": "rm -rf dist && tsc --build",
     "test": "jest --setupFiles dotenv/config",
     "lint": "eslint --ext .ts ./src",
     "demo": "ts-node -r dotenv/config"
@@ -27,7 +27,6 @@
     "case-anything": "1.1.2",
     "got": "11.8.0",
     "is-what": "3.11.2",
-    "lodash": "4.17.20",
     "node-cache": "5.1.2"
   },
   "devDependencies": {

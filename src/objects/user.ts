@@ -99,6 +99,10 @@ export class User implements UserData {
     return first ? new Stream(first, this.client) : null;
   }
 
+  public async isLive(): Promise<boolean> {
+    return this.getStream().then((stream) => stream !== null);
+  }
+
   public toJSON(): UserData {
     return omitWithoutFunctions(this, ["client"]) as UserData;
   }
