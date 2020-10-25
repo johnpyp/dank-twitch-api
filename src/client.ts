@@ -17,25 +17,24 @@ export interface IAccessTokenExpiryStore {
 class AccessTokenExpiryStore implements IAccessTokenExpiryStore {
   private cache = new NodeCache();
 
-  async set(data: string, expiry: number): Promise<boolean> {
+  public async set(data: string, expiry: number): Promise<boolean> {
     return this.cache.set("accessToken", data, expiry);
   }
 
-  async has(): Promise<boolean> {
+  public async has(): Promise<boolean> {
     return this.cache.has("accessToken");
   }
 
-  async get(): Promise<string | undefined> {
+  public async get(): Promise<string | undefined> {
     return this.cache.get("accessToken");
   }
 }
 
 export interface ClientConfiguration {
-  clientId?: string;
+  clientId: string;
   clientSecret?: string;
-  oauthToken?: string;
-  url?: string;
-  tokenCache?: IAccessTokenExpiryStore;
+  tokenCache: IAccessTokenExpiryStore;
+  url: string;
 }
 
 const buildDefaultConfiguration: () => ClientConfiguration = () => ({
@@ -49,7 +48,7 @@ export default class Client {
 
   public request: Got;
 
-  constructor(config: ClientConfiguration = {}) {
+  constructor(config: Partial<ClientConfiguration> = {}) {
     this.config = { ...buildDefaultConfiguration(), ...config };
     this.request = got.extend({
       prefixUrl: this.config.url,
@@ -99,7 +98,7 @@ export default class Client {
     return body.access_token;
   }
 
-  public async getUser(username: string): Promise<User> {
+  public async getUser(username: string): Promise<User | null> {
     const body: { data: UserResponseData[] } = await this.request
       .get("users", { searchParams: { login: username } })
       .json();
@@ -111,12 +110,19 @@ export default class Client {
     return (await this.getUser(username)) !== null;
   }
 
-  public async getUserById(id: string): Promise<User> {
+  public async getUserById(id: string): Promise<User | null> {
     const body: { data: UserResponseData[] } = await this.request
       .get("users", { searchParams: { id } })
       .json();
     const first = body.data[0];
     return first ? new User(first, this) : null;
+  }
+
+  public async getUserByIdUnsafe(id: string): Promise<User> {
+    const body: { data: UserResponseData[] } = await this.request
+      .get("users", { searchParams: { id } })
+      .json();
+    return new User(body.data[0], this);
   }
 
   public async userExistsById(id: string): Promise<boolean> {

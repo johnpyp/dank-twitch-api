@@ -22,7 +22,7 @@ export class UserFollow implements UserFollowData {
 
   private client: Client;
 
-  public constructor(raw: UserFollowResponseData, client: Client) {
+  constructor(raw: UserFollowResponseData, client: Client) {
     this.userId = raw.from_id;
     this.userDisplayName = raw.from_name;
     this.followingId = raw.to_id;
@@ -33,18 +33,18 @@ export class UserFollow implements UserFollowData {
     this.client = client;
   }
 
-  getUser(): Promise<User> {
-    return this.client.getUserById(this.userId);
+  public getUser(): Promise<User> {
+    return this.client.getUserByIdUnsafe(this.userId);
   }
 
-  getFollowingUser(): Promise<User> {
-    return this.client.getUserById(this.followingId);
+  public getFollowingUser(): Promise<User> {
+    return this.client.getUserByIdUnsafe(this.followingId);
   }
 
-  toJSON(): UserFollowData {
+  public toJSON(): UserFollowData {
     return omitWithoutFunctions(this, ["client"]) as UserFollowData;
   }
-  json(): UserFollowData {
+  public json(): UserFollowData {
     return this.toJSON();
   }
 }

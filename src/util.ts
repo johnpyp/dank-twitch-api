@@ -1,4 +1,4 @@
-import { isFunction, isString } from "is-what";
+import { isFunction } from "is-what";
 import { Got } from "got";
 import _ from "lodash";
 import { Pagination } from "./responses";
@@ -7,7 +7,7 @@ import Client from "./client";
 export async function iterateApi<T>(
   request: Got,
   max: number,
-  params: any,
+  params: Record<any, any>,
   path: string
 ): Promise<T[]> {
   let after: string | undefined;
@@ -67,6 +67,6 @@ export function transformRawDataMap<T, U>(
 export function fixEmptyStrings<T extends string>(
   data: T
 ): Exclude<T, ""> | null {
-  if (data === "" || data === null) return undefined;
+  if (data === "" || data === undefined) return null;
   return data as Exclude<T, "">;
 }

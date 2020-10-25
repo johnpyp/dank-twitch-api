@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 export interface UserResponseData {
   id: string;
   login: string;
@@ -40,6 +41,20 @@ export interface VideosResponseData {
   language: string;
   type: "upload" | "archive" | "highlight";
   duration: string;
+}
+
+export interface StreamResponseData {
+  id: string;
+  user_id: string;
+  user_name: string;
+  viewer_count: number;
+  game_id: string;
+  language: string;
+  started_at: string;
+  tag_ids: string[];
+  thumbnail_url: string;
+  title: string;
+  type: "live" | "";
 }
 
 export interface Pagination {

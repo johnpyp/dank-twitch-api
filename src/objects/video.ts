@@ -63,14 +63,15 @@ export class Video implements VideoData {
     this.client = client;
   }
 
-  getUser(): Promise<User> {
-    return this.client.getUserById(this.id);
+  public async getUser(): Promise<User> {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this.client.getUserById(this.userId).then((user) => user!);
   }
 
-  toJSON(): VideoData {
+  public toJSON(): VideoData {
     return omitWithoutFunctions(this, ["client"]) as VideoData;
   }
-  json(): VideoData {
+  public json(): VideoData {
     return this.toJSON();
   }
 }

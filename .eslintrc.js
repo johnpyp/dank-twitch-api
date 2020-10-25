@@ -25,6 +25,19 @@ module.exports = {
     "@typescript-eslint/interface-name-prefix": 0,
     "lines-between-class-members": 0,
     "@typescript-eslint/no-explicit-any": 0,
+    "@typescript-eslint/explicit-member-accessibility": [
+      "error",
+      {
+        accessibility: "explicit",
+        overrides: {
+          accessors: "explicit",
+          constructors: "no-public",
+          methods: "explicit",
+          properties: "explicit",
+          parameterProperties: "explicit",
+        },
+      },
+    ],
   },
 
   parser: "@typescript-eslint/parser",

@@ -2,6 +2,7 @@ import {
   UserResponseData,
   UserFollowResponseData,
   VideosResponseData,
+  StreamResponseData,
 } from "../responses";
 import Client from "../client";
 import {
@@ -11,7 +12,8 @@ import {
   fixEmptyStrings,
 } from "../util";
 import { Video } from "./video";
-import { UserFollow } from "./follower";
+import { UserFollow } from "./user-follow";
+import { Stream } from "./stream";
 
 export interface UserData {
   id: string;
@@ -52,7 +54,7 @@ export class User implements UserData {
     this.client = client;
   }
 
-  async getFollowing(max = -1): Promise<UserFollow[]> {
+  public async getFollowing(max = -1): Promise<UserFollow[]> {
     return iterateApi<UserFollowResponseData>(
       this.client.request,
       max,
@@ -63,7 +65,7 @@ export class User implements UserData {
     ).then(transformRawDataMap(UserFollow, this.client));
   }
 
-  async getFollowers(max = -1): Promise<UserFollow[]> {
+  public async getFollowers(max = -1): Promise<UserFollow[]> {
     return iterateApi<UserFollowResponseData>(
       this.client.request,
       max,
@@ -74,7 +76,7 @@ export class User implements UserData {
     ).then(transformRawDataMap(UserFollow, this.client));
   }
 
-  async getVideos(
+  public async getVideos(
     max = -1,
     period: "all" | "day" | "week" | "month" = "all",
     sort: "time" | "trending" | "views" = "time"
@@ -87,10 +89,20 @@ export class User implements UserData {
     ).then(transformRawDataMap(Video, this.client));
   }
 
-  toJSON(): UserData {
+  public async getStream(): Promise<Stream | null> {
+    const body: {
+      data: StreamResponseData[];
+    } = await this.client.request
+      .get("streams", { searchParams: { user_id: this.id } })
+      .json();
+    const first = body.data[0];
+    return first ? new Stream(first, this.client) : null;
+  }
+
+  public toJSON(): UserData {
     return omitWithoutFunctions(this, ["client"]) as UserData;
   }
-  json(): UserData {
+  public json(): UserData {
     return this.toJSON();
   }
 }
