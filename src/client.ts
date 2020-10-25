@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/interface-name-prefix */
-/* eslint-disable max-classes-per-file */
-/* eslint-disable @typescript-eslint/camelcase */
 import got, { Got, Response } from "got";
 import NodeCache from "node-cache";
 import {
@@ -9,13 +6,7 @@ import {
   VideosResponseData,
   IterateResponse,
 } from "./responses";
-import User from "./user";
-
-export interface IExpiryKVStore<T> {
-  set: (key: string, data: T, expiry: number) => Promise<boolean>;
-  get: (key: string) => Promise<T | undefined>;
-  has: (key: string) => Promise<boolean>;
-}
+import { User } from "./objects/user";
 
 export interface IAccessTokenExpiryStore {
   set: (data: string, expiry: number) => Promise<boolean>;
@@ -108,7 +99,7 @@ export default class Client {
     return body.access_token;
   }
 
-  async getUser(username: string): Promise<User> {
+  public async getUser(username: string): Promise<User> {
     const body: { data: UserResponseData[] } = await this.request
       .get("users", { searchParams: { login: username } })
       .json();
@@ -116,11 +107,11 @@ export default class Client {
     return first ? new User(first, this) : null;
   }
 
-  async userExists(username: string): Promise<boolean> {
+  public async userExists(username: string): Promise<boolean> {
     return (await this.getUser(username)) !== null;
   }
 
-  async getUserById(id: string): Promise<User> {
+  public async getUserById(id: string): Promise<User> {
     const body: { data: UserResponseData[] } = await this.request
       .get("users", { searchParams: { id } })
       .json();
@@ -128,11 +119,11 @@ export default class Client {
     return first ? new User(first, this) : null;
   }
 
-  async userExistsById(id: string): Promise<boolean> {
+  public async userExistsById(id: string): Promise<boolean> {
     return (await this.getUserById(id)) !== null;
   }
 
-  async getVideoById(id: string): Promise<VideosResponseData> {
+  public async getVideoById(id: string): Promise<VideosResponseData> {
     const body: IterateResponse<VideosResponseData> = await this.request
       .get("videos", { searchParams: { id } })
       .json();

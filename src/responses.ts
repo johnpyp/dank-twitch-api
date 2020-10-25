@@ -25,10 +25,6 @@ export interface UserFollowResponseData {
   followed_at: string;
 }
 
-export interface Pagination {
-  cursor: string;
-}
-
 export interface VideosResponseData {
   id: string;
   user_id: string;
@@ -39,11 +35,15 @@ export interface VideosResponseData {
   published_at: string;
   url: string;
   thumbnail_url: string;
-  viewable: string;
+  viewable: "public" | "private";
   view_count: number;
   language: string;
-  type: string;
+  type: "upload" | "archive" | "highlight";
   duration: string;
+}
+
+export interface Pagination {
+  cursor: string;
 }
 
 export interface IterateResponse<T> {

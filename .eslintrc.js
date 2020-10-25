@@ -20,6 +20,11 @@ module.exports = {
     "import/no-unresolved": 0,
     "no-await-in-loop": 0,
     "@typescript-eslint/camelcase": 0,
+    "max-classes-per-file": 0,
+    "import/prefer-default-export": 0,
+    "@typescript-eslint/interface-name-prefix": 0,
+    "lines-between-class-members": 0,
+    "@typescript-eslint/no-explicit-any": 0,
   },
 
   parser: "@typescript-eslint/parser",
