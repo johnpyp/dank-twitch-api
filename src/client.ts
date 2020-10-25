@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/interface-name-prefix */
+/* eslint-disable max-classes-per-file */
 /* eslint-disable @typescript-eslint/camelcase */
 import got, { Got, Response } from "got";
 import NodeCache from "node-cache";
@@ -9,35 +11,51 @@ import {
 } from "./responses";
 import User from "./user";
 
+export interface IExpiryStore<T> {
+  set: (key: string, data: T, expiry: number) => Promise<boolean>;
+  get: (key: string) => Promise<T | undefined>;
+  has: (key: string) => Promise<boolean>;
+}
+
+type ITokenExpiryStore = IExpiryStore<string>;
+
+class TokenExpiryStore implements ITokenExpiryStore {
+  private cache = new NodeCache();
+
+  async set(key: string, data: string, expiry: number): Promise<boolean> {
+    return this.cache.set(key, data, expiry);
+  }
+
+  async has(key: string): Promise<boolean> {
+    return this.cache.has(key);
+  }
+
+  async get(key: string): Promise<string | undefined> {
+    return this.cache.get(key);
+  }
+}
+
 export interface ClientConfiguration {
   clientId?: string;
   clientSecret?: string;
   oauthToken?: string;
   url?: string;
+  tokenCache?: ITokenExpiryStore;
 }
 
-const defaultConfiguration: ClientConfiguration = {
+const buildDefaultConfiguration: () => ClientConfiguration = () => ({
   url: "https://api.twitch.tv/helix",
   clientId: "3yumzvi6r4wfycsk7vt1kbtto9s0n4",
-};
+  tokenCache: new TokenExpiryStore(),
+});
 
 export default class Client {
   public config: ClientConfiguration;
 
   public request: Got;
 
-  private tokenCache: NodeCache;
-
-  private get accessToken(): string {
-    if (this.tokenCache.has("accessToken")) {
-      return this.tokenCache.get("accessToken");
-    }
-    return null;
-  }
-
   constructor(config: ClientConfiguration = {}) {
-    this.config = { ...defaultConfiguration, ...config };
-    this.tokenCache = new NodeCache();
+    this.config = { ...buildDefaultConfiguration(), ...config };
     this.request = got.extend({
       prefixUrl: this.config.url,
       headers: {
@@ -45,10 +63,11 @@ export default class Client {
       },
       hooks: {
         beforeRequest: [
-          (options): void => {
-            if (this.accessToken) {
+          async (options): Promise<void> => {
+            const token = await this.getAccessToken();
+            if (token) {
               // eslint-disable-next-line no-param-reassign
-              options.headers.Authorization = `Bearer ${this.accessToken}`;
+              options.headers.Authorization = `Bearer ${token}`;
             }
           },
         ],
@@ -57,7 +76,7 @@ export default class Client {
             if (response.statusCode === 401) {
               const updatedOptions = {
                 headers: {
-                  token: await this.getAccessToken(),
+                  token: await this.renewAccessToken(),
                 },
               };
               return retryWithMergedOptions(updatedOptions);
@@ -69,7 +88,12 @@ export default class Client {
     });
   }
 
-  private async getAccessToken(): Promise<string> {
+  private async getAccessToken(): Promise<string | null> {
+    const token = await this.config.tokenCache.get("accessToken");
+    return token ?? null;
+  }
+
+  private async renewAccessToken(): Promise<string> {
     if (!this.config.clientSecret) throw new Error("Client secret not present");
     const body: GetAccessTokenResponse = await got
       .post("https://id.twitch.tv/oauth2/token", {
@@ -80,7 +104,12 @@ export default class Client {
         },
       })
       .json();
-    this.tokenCache.set("accessToken", body.access_token, body.expires_in);
+    console.log(body);
+    this.config.tokenCache.set(
+      "accessToken",
+      body.access_token,
+      body.expires_in
+    );
     return body.access_token;
   }
 
