@@ -11,27 +11,31 @@ import {
 } from "./responses";
 import User from "./user";
 
-export interface IExpiryStore<T> {
+export interface IExpiryKVStore<T> {
   set: (key: string, data: T, expiry: number) => Promise<boolean>;
   get: (key: string) => Promise<T | undefined>;
   has: (key: string) => Promise<boolean>;
 }
 
-type ITokenExpiryStore = IExpiryStore<string>;
+export interface IAccessTokenExpiryStore {
+  set: (data: string, expiry: number) => Promise<boolean>;
+  get: () => Promise<string | undefined>;
+  has: () => Promise<boolean>;
+}
 
-class TokenExpiryStore implements ITokenExpiryStore {
+class AccessTokenExpiryStore implements IAccessTokenExpiryStore {
   private cache = new NodeCache();
 
-  async set(key: string, data: string, expiry: number): Promise<boolean> {
-    return this.cache.set(key, data, expiry);
+  async set(data: string, expiry: number): Promise<boolean> {
+    return this.cache.set("accessToken", data, expiry);
   }
 
-  async has(key: string): Promise<boolean> {
-    return this.cache.has(key);
+  async has(): Promise<boolean> {
+    return this.cache.has("accessToken");
   }
 
-  async get(key: string): Promise<string | undefined> {
-    return this.cache.get(key);
+  async get(): Promise<string | undefined> {
+    return this.cache.get("accessToken");
   }
 }
 
@@ -40,13 +44,13 @@ export interface ClientConfiguration {
   clientSecret?: string;
   oauthToken?: string;
   url?: string;
-  tokenCache?: ITokenExpiryStore;
+  tokenCache?: IAccessTokenExpiryStore;
 }
 
 const buildDefaultConfiguration: () => ClientConfiguration = () => ({
   url: "https://api.twitch.tv/helix",
   clientId: "3yumzvi6r4wfycsk7vt1kbtto9s0n4",
-  tokenCache: new TokenExpiryStore(),
+  tokenCache: new AccessTokenExpiryStore(),
 });
 
 export default class Client {
@@ -64,7 +68,7 @@ export default class Client {
       hooks: {
         beforeRequest: [
           async (options): Promise<void> => {
-            const token = await this.getAccessToken();
+            const token = await this.config.tokenCache.get();
             if (token) {
               // eslint-disable-next-line no-param-reassign
               options.headers.Authorization = `Bearer ${token}`;
@@ -88,11 +92,6 @@ export default class Client {
     });
   }
 
-  private async getAccessToken(): Promise<string | null> {
-    const token = await this.config.tokenCache.get("accessToken");
-    return token ?? null;
-  }
-
   private async renewAccessToken(): Promise<string> {
     if (!this.config.clientSecret) throw new Error("Client secret not present");
     const body: GetAccessTokenResponse = await got
@@ -105,11 +104,7 @@ export default class Client {
       })
       .json();
     console.log(body);
-    this.config.tokenCache.set(
-      "accessToken",
-      body.access_token,
-      body.expires_in
-    );
+    this.config.tokenCache.set(body.access_token, body.expires_in);
     return body.access_token;
   }
 
