@@ -5,7 +5,7 @@ A library for using the twitch helix api
 example:
 
 ```ts
-import Client from "../src/client";
+import Client from "dank-twitch-api";
 
 const main = async (): Promise<void> => {
   const client = new Client({
