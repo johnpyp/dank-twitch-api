@@ -8,7 +8,7 @@
     "build": "tsc --build",
     "test": "jest --setupFiles dotenv/config",
     "lint": "eslint --ext .ts ./src",
-    "demo": "ts-node -r dotenv/config demo/demo.ts"
+    "demo": "ts-node -r dotenv/config"
   },
   "repository": {
     "type": "git",
