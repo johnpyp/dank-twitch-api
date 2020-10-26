@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/johnpyp/confic.git"
+    "url": "git+https://github.com/johnpyp/dank-twitch-api.git"
   },
   "keywords": [
     "config"
@@ -20,9 +20,9 @@
   "author": "johnpyp",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/johnpyp/confic/issues"
+    "url": "https://github.com/johnpyp/dank-twitch-api/issues"
   },
-  "homepage": "https://github.com/johnpyp/confic#readme",
+  "homepage": "https://github.com/johnpyp/dank-twitch-api",
   "dependencies": {
     "case-anything": "1.1.2",
     "got": "11.8.0",
